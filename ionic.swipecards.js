@@ -1,4 +1,4 @@
-(function(ionic) {
+;(function(ionic) {
 
   // Get transform origin poly
   var d = document.createElement('div');
@@ -23,7 +23,7 @@
     }
   }
 
-  var SwipeableCardController = ionic.controllers.ViewController.inherit({
+  var SwipeableCardController = ionic.views.View.inherit({
     initialize: function(opts) {
       this.cards = [];
 
@@ -93,7 +93,7 @@
       this.startX = this.startY = this.x = this.y = 0;
 
       this.flipped = false;
-      
+
       this.gestureEnabled = true;
 
       this.bindEvents();
@@ -165,7 +165,7 @@
     disableTransition: function(animationClass) {
       this.el.classList.remove(animationClass);
     },
-    
+
     /**
      * Enable gestures on the card
      */
@@ -180,7 +180,7 @@
       this.enableGesture(false);
       this.transitionOut(false);
     },
-    
+
     /**
      * Swipe a card out to the left programmatically
      */
@@ -206,7 +206,7 @@
         self.onDestroy && self.onDestroy();
       }, duration * 1000);
     },
-    
+
     /**
      * Animate the card back into resting position.
      */
@@ -231,11 +231,11 @@
      */
     bindEvents: function() {
       var self = this;
-      
+
       ionic.onGesture('release', function(e) {
         window.requestAnimationFrame(function() { self._doTap(e) });
       }, this.el);
-      
+
       ionic.onGesture('dragstart', function(e) {
         window.requestAnimationFrame(function() { self._doDragStart(e) });
       }, this.el);
@@ -259,7 +259,7 @@
       this.el.style[TRANSFORM_ORIGIN] = 'right center';
       this.rotationDirection = -1;
     },
-    
+
     _doTap: function(e) {
       //Check if we are allowed to perform a gesture
       if(this.gestureEnabled) {
@@ -279,7 +279,7 @@
         			elements[i].style.display = 'list-item';
         			elements[i].style[ionic.CSS.TRANSFORM] = 'rotate'+((self.el.offsetWidth > self.el.offsetHeight) ? 'X':'Y')+'(180deg)';
         		}
-        		self.onFlipFront && self.onFlipFront();	
+        		self.onFlipFront && self.onFlipFront();
         	}, 250);
         } else {
         	this.el.style[ionic.CSS.TRANSFORM] = 'rotate'+((this.el.offsetWidth > this.el.offsetHeight) ? 'X':'Y')+'(0deg)';
@@ -293,19 +293,19 @@
         		for(var i = 0, elements = self.el.getElementsByClassName('back'); i < elements.length; i++) {
         			elements[i].style.display = 'none';
         		}
-        		self.onFlipBack && self.onFlipBack();	
+        		self.onFlipBack && self.onFlipBack();
         	}, 250);
         }
       }
       this.enableGesture(true);
-      
+
     },
 
     _doDragStart: function(e) {
       this.enableGesture(false);
       this.el.style[TRANSITION] = 'none';
       this.el.style.zIndex = 10;
-      
+
       var width = this.el.offsetWidth;
       var point = window.innerWidth / 2 + this.rotationDirection * (width / 2)
       var distance = Math.abs(point - e.gesture.touches[0].pageX);
@@ -321,7 +321,7 @@
       this.x = this.startX + (e.gesture.deltaX);
       this.y = this.startY + (e.gesture.deltaY);
       this.el.style[ionic.CSS.TRANSFORM] = 'translate3d(' + this.x + 'px, ' + this.y  + 'px, 0) rotate(' + (this.rotationAngle || 0) + 'rad)';
-      
+
       if(this.flipped) {
         this.el.style[ionic.CSS.TRANSFORM] += ' rotate'+((this.el.offsetWidth > this.el.offsetHeight) ? 'X':'Y')+'(180deg)';
       }
