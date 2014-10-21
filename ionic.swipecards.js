@@ -30,7 +30,7 @@
       var ratio = window.innerWidth / window.innerHeight;
 
       this.maxWidth = window.innerWidth - (opts.cardGutterWidth || 0);
-      this.maxHeight = opts.height || 300;
+      // this.maxHeight = opts.height || 300;
       this.cardGutterWidth = opts.cardGutterWidth || 10;
       this.cardPopInDuration = opts.cardPopInDuration || 400;
       this.cardAnimation = opts.cardAnimation || 'pop-in';
@@ -64,7 +64,7 @@
       // Move each card 5 pixels down to give a nice stacking effect (max of 3 stacked)
       nextCard.setPopInDuration(this.cardPopInDuration);
       nextCard.setZIndex(this.cards.length);
-      nextCard.el.style.maxHeight  = (window.innerHeight / this.cards.length) + 'px';
+      // nextCard.el.style.maxHeight  = (window.innerHeight / this.cards.length) + 'px';
     },
     /**
      * Pop a card from the stack
@@ -83,8 +83,7 @@
      * Initialize a card with the given options.
      */
     initialize: function(opts) {
-      opts = ionic.extend({
-      }, opts);
+      opts = ionic.extend({}, opts);
 
       ionic.extend(this, opts);
 
@@ -97,6 +96,8 @@
       this.isFlippable = false;
 
       this.radius = 75;
+
+      this.isDragable = true;
 
       this.bindEvents();
     },
@@ -169,10 +170,17 @@
     },
 
     /**
-     * Enable gestures on the card
+     * Enable card flipping
      */
     enableFlip: function(enable) {
       this.isFlippable = enable;
+    },
+
+    /**
+     * Enable card draging
+     */
+    enableDrag: function(enable) {
+      this.isDragable = enable;
     },
 
     /**
@@ -239,19 +247,19 @@
       var self = this;
 
       ionic.onGesture('release', function(e) {
-        window.requestAnimationFrame(function() { self._doTap(e) });
+        window.requestAnimationFrame(function() { self._doTap(e); });
       }, this.el);
 
       ionic.onGesture('dragstart', function(e) {
-        window.requestAnimationFrame(function() { self._doDragStart(e) });
+        window.requestAnimationFrame(function() { self._doDragStart(e); });
       }, this.el);
 
       ionic.onGesture('drag', function(e) {
-        window.requestAnimationFrame(function() { self._doDrag(e) });
+        window.requestAnimationFrame(function() { self._doDrag(e); });
       }, this.el);
 
       ionic.onGesture('dragend', function(e) {
-        window.requestAnimationFrame(function() { self._doDragEnd(e) });
+        window.requestAnimationFrame(function() { self._doDragEnd(e); });
       }, this.el);
     },
 
@@ -267,6 +275,7 @@
     // },
 
     _doTap: function(e) {
+      /*jshint expr:true*/
       //Check if we are allowed to perform a gesture
       if(this.isFlippable) {
       	var self = this;
@@ -303,7 +312,7 @@
         	}, 250);
         }
       }
-      this.enableFlip(true);
+      // this.enableFlip(true);
 
     },
 
@@ -320,22 +329,23 @@
     },
 
     _doDrag: function(e) {
-      var o = e.gesture.deltaX / 3;
+      if (this.isDragable) {
+        var o = e.gesture.deltaX / 3;
 
-      this.rotationAngle = Math.atan(o/this.touchDistance) * this.rotationDirection;
+        this.rotationAngle = Math.atan(o/this.touchDistance) * this.rotationDirection;
 
-      this.x = this.startX + (e.gesture.deltaX);
-      this.y = this.startY + (e.gesture.deltaY);
+        this.x = this.startX + (e.gesture.deltaX);
+        this.y = this.startY + (e.gesture.deltaY);
 
-      this.onDrag(this.provideParams({x: this.x, y: this.y}));
-      move.apply(this);
-      this.el.style[ionic.CSS.TRANSFORM] = 'translate3d(' + this.x + 'px, ' + this.y  + 'px, 0) rotate(' + (this.rotationAngle || 0) + 'rad)';
+        this.onDrag(this.provideParams({x: this.x, y: this.y}));
+        move.apply(this);
+        this.el.style[ionic.CSS.TRANSFORM] = 'translate3d(' + this.x + 'px, ' + this.y  + 'px, 0) rotate(' + (this.rotationAngle || 0) + 'rad)';
 
-      if(this.flipped) {
-        this.el.style[ionic.CSS.TRANSFORM] += ' rotate'+((this.el.offsetWidth > this.el.offsetHeight) ? 'X':'Y')+'(180deg)';
+        if (this.flipped) {
+          this.el.style[ionic.CSS.TRANSFORM] += ' rotate'+((this.el.offsetWidth > this.el.offsetHeight) ? 'X':'Y')+'(180deg)';
+        }
+
       }
-
-
 
       function move () {
         if (! this.beforeThreshold()) {
@@ -365,6 +375,9 @@
       var distance = this.getDistance(coords);
       return {
         relativeDistanceToCircle: (distance - this.radius) / this.radius,
+        relativeX: this.x,
+        relativeY: this.y,
+        beforeThreshold: this.beforeThreshold()
       };
     },
 
@@ -412,8 +425,9 @@
           // Instantiate our card view
           var swipeableCard = new SwipeableCardView({
             el: el,
-            onDrag: function (e) {
-              $scope.onCardDrag({$params: e});
+            onDrag: function (params) {
+              $rootScope.$emit('swipeCard.drag', params);
+              $scope.onCardDrag({$params: params});
             },
             onSwipe: function(right) {
               $timeout(function() {
@@ -424,11 +438,13 @@
             },
             onFlipFront: function() {
               $timeout(function() {
+                $rootScope.$emit('swipeCard.flippedToBack')
                 $scope.onCardFlipFront();
               });
             },
             onFlipBack: function() {
               $timeout(function() {
+                $rootScope.$emit('swipeCard.flippedToFront');
                 $scope.onCardFlipBack();
               });
             },
