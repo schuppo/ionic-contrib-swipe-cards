@@ -33,7 +33,7 @@
       // this.maxHeight = opts.height || 300;
       this.cardGutterWidth = opts.cardGutterWidth || 10;
       this.cardPopInDuration = opts.cardPopInDuration || 400;
-      this.cardAnimation = opts.cardAnimation || 'pop-in';
+      // this.cardAnimation = opts.cardAnimation || 'pop-in';
     },
     /**
      * Push a new card onto the stack.
@@ -57,13 +57,13 @@
       if(!nextCard) return;
 
       // Calculate the top left of a default card, as a translated pos
-      var topLeft = window.innerHeight / 2 - this.maxHeight/2;
+      // var topLeft = window.innerHeight / 2 - this.maxHeight/2;
 
-      var cardOffset = Math.min(this.cards.length, 3) * 5;
+      // var cardOffset = Math.min(this.cards.length, 3) * 5;
 
       // Move each card 5 pixels down to give a nice stacking effect (max of 3 stacked)
       nextCard.setPopInDuration(this.cardPopInDuration);
-      nextCard.setZIndex(this.cards.length);
+      nextCard.setZIndex(0);
       // nextCard.el.style.maxHeight  = (window.innerHeight / this.cards.length) + 'px';
     },
     /**
@@ -95,7 +95,7 @@
 
       this.isFlippable = false;
 
-      this.radius = 75;
+      this.radius = 15;
 
       this.isDragable = true;
 
@@ -397,7 +397,7 @@
     beforeThreshold: function() {
 
       var distance = this.getDistance({x: this.x, y: this.y});
-      return Math.abs(this.x - this.startX) < this.radius && distance < this.radius;
+      return Math.abs(this.x - this.startX) < this.radius;
     }
   });
 
